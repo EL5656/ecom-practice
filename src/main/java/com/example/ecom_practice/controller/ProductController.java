@@ -4,6 +4,7 @@ import com.example.ecom_practice.dto.ProductResponseDto;
 import com.example.ecom_practice.model.Product;
 import com.example.ecom_practice.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -11,8 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -62,17 +61,19 @@ public class ProductController {
                     savedProduct.getQuantity(),  savedProduct.getImage() != null ? savedProduct.getImage().getBytes(1, (int) savedProduct.getImage().length()) : null);
        return ResponseEntity.ok(responseDto);
     }
-
-
-//    @GetMapping("product/{productId}/image")
-//    public ResponseEntity<byte[]> getImageByProductId(@PathVariable int productId){
-//        Product product = service.getProductById(productId);
-//        byte[] imageFile = product.getImage();
-//        return ResponseEntity.ok()
-//                .contentType(MediaType.valueOf((product.getImageType())))
-//                .body(imageFile);
-//    }
-
+    @GetMapping("product/{productId}/image")
+    public ResponseEntity<byte[]> getImageByProductId(@PathVariable int productId) {
+        try {
+            byte[] imageBytes = service.getImageByProductId(productId);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.IMAGE_JPEG);
+            return ResponseEntity.ok().headers(headers).body(imageBytes);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
 //    @PutMapping("/product/{id}")
 //    public ResponseEntity<String> updateProduct(@PathVariable int id, @RequestPart Product product,
 //                                                @RequestPart MultipartFile imageFile){
