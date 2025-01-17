@@ -61,6 +61,7 @@ public class ProductController {
                     savedProduct.getQuantity(),  savedProduct.getImage() != null ? savedProduct.getImage().getBytes(1, (int) savedProduct.getImage().length()) : null);
        return ResponseEntity.ok(responseDto);
     }
+
     @GetMapping("product/{productId}/image")
     public ResponseEntity<byte[]> getImageByProductId(@PathVariable int productId) {
         try {
@@ -74,21 +75,30 @@ public class ProductController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-//    @PutMapping("/product/{id}")
-//    public ResponseEntity<String> updateProduct(@PathVariable int id, @RequestPart Product product,
-//                                                @RequestPart MultipartFile imageFile){
-//        Product product1 = null;
-//        try {
-//            product1 = service.updateProduct(id, product, imageFile);
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//        if(product1!=null){
-//            return new ResponseEntity<>("Updated", HttpStatus.OK);
-//        }else{
-//            return new ResponseEntity<>("Failed to update",HttpStatus.BAD_REQUEST);
-//        }
-//    }
+    @PutMapping("/product/{id}")
+    public ResponseEntity<Product> updateProduct(
+            @PathVariable int id,
+            @RequestParam String name,
+            @RequestParam String desc,
+            @RequestParam String brand,
+            @RequestParam double price,
+            @RequestParam String category,
+            @RequestParam boolean available,
+            @RequestParam int quantity,
+            @RequestParam String releaseDate,
+            @RequestParam(required = false) MultipartFile file) {
+
+        try {
+            // Call service directly with parameters
+            Product updatedProduct = service.updateProduct(id, name, desc, brand, price, category, available, quantity, releaseDate, file);
+            return ResponseEntity.ok(updatedProduct);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 
     @DeleteMapping("/product/{id}")
     public ResponseEntity<String> deleteProduct(@PathVariable int id){

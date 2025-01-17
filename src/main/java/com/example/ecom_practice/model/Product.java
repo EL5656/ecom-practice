@@ -1,6 +1,7 @@
 package com.example.ecom_practice.model;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -32,6 +33,18 @@ public class Product {
     private boolean available;
     private int quantity;
 
+    @JsonIgnore
     @Lob
     private Blob image;
+
+    public Product(String name, String desc, String brand, Double price, String category, Date releaseDate, boolean available, int quantity) {
+        this.name = name;
+        this.desc = desc;
+        this.brand = brand;
+        this.price = price;
+        this.category = category;
+        this.releaseDate = releaseDate;
+        this.available = available;
+        this.quantity = quantity;
+    }
 }

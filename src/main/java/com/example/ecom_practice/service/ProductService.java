@@ -43,55 +43,58 @@ public class ProductService {
         }
     }
 
-
     public Product addProduct(
             String name, String desc, String brand, double price, String category,
             boolean available, int quantity, String releaseDateString, MultipartFile file
     ) throws IOException, ParseException, SQLException {
+
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
         Date releaseDate = sdf.parse(releaseDateString);
 
-        Product product = new Product();
-        product.setName(name);
-        product.setDesc(desc);
-        product.setBrand(brand);
-        product.setPrice(price);
-        product.setCategory(category);
-        product.setAvailable(available);
-        product.setQuantity(quantity);
-        product.setReleaseDate(releaseDate);
+        Product product = new Product(name, desc, brand, price, category, releaseDate, available, quantity);
 
         // Check if the product with the same ID exists
         if (repo.existsById(product.getId())) {
             throw new RuntimeException("Product with this ID already exists!");
         } else {
-            // If the product does not exist, save the new product
-            if (!file.isEmpty()) {
-                byte[] imageBytes = file.getBytes();
-                Blob photoBlob = new SerialBlob(imageBytes);
-                product.setImage(photoBlob);
-            }
-
-            return repo.save(product);
-        }
-    }
-
-
-
-    public Product updateProduct(Product product, MultipartFile file)
-            throws IOException, SQLException {
-
-        if (repo.existsById(product.getId())) {
             if (!file.isEmpty()) {
                 byte[] imageBytes = file.getBytes();
                 Blob photoBlob = new SerialBlob(imageBytes);
                 product.setImage(photoBlob);
             }
             return repo.save(product);
-        } else{
-            throw new RuntimeException("Product with this ID does not exist!");
         }
     }
+
+
+    public Product updateProduct(
+            int id, String name, String desc, String brand, double price,
+            String category, boolean available, int quantity,
+            String releaseDateString, MultipartFile file)
+            throws IOException, SQLException, ParseException {
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        Date releaseDate = sdf.parse(releaseDateString);
+
+        Product existingProduct = repo.findById(id).orElseThrow(() -> new RuntimeException("Product not found"));
+
+        existingProduct.setName(name);
+        existingProduct.setDesc(desc);
+        existingProduct.setBrand(brand);
+        existingProduct.setPrice(price);
+        existingProduct.setCategory(category);
+        existingProduct.setAvailable(available);
+        existingProduct.setQuantity(quantity);
+        existingProduct.setReleaseDate(releaseDate);
+
+        if (file != null && !file.isEmpty()) {
+            byte[] imageBytes = file.getBytes();
+            Blob photoBlob = new SerialBlob(imageBytes);
+            existingProduct.setImage(photoBlob);
+        }
+        return repo.save(existingProduct);
+    }
+
 
     public void deleteProduct(int id) {
         repo.deleteById(id);
